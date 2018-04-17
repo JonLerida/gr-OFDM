@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<block>
+  <name>OFDM_Phy_Impl</name>
+  <key>OFDM_OFDM_PHY_IMPL_cb</key>
+  <category>[OFDM]</category>
+  <import>import OFDM</import>
+  <make>OFDM.OFDM_PHY_IMPL_cb($Nport, $Occupied_Carriers, $Pilot_Carriers)</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+       <param>
+         <name>Nport</name>
+         <key>Nport</key>
+         <type>int</type>
+       </param>
+       <param>
+         <name>Occupied_Carriers</name>
+         <key>Occupied_Carriers</key>
+         <type>int_vector</type>
+       </param>
+
+       <param>
+         <name>Pilot_Carriers</name>
+         <key>Pilot_Carriers</key>
+         <type>int_vector</type>
+       </param>
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>byte</type>
+  </source>
+</block>
