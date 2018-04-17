@@ -26,6 +26,8 @@ from gnuradio import gr
 from itertools import chain
 import imp
 
+# This path should be changed in another PC implementation
+
 OFDM_Variables = imp.load_source('MAC_Vars', '/home/leri/Escritorio/tfg/AccesoMedio/gr-OFDM/python/OFDM_Variables.py')
 MAC_Class = OFDM_Variables.MAC_Vars
 
@@ -36,7 +38,6 @@ class MAC_OFDM(gr.basic_block):
     y el contador de paquete.
     Añade etiquetas GNU para el siguiente nivel
     """
-
     def __init__(self, SRC_MAC, DST_MAC, Payload_Size):
         gr.basic_block.__init__(self,
             name="MAC_OFDM",
