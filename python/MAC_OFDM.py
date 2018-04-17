@@ -27,7 +27,6 @@ from itertools import chain
 import imp
 
 # This path should be changed in another PC implementation
-
 OFDM_Variables = imp.load_source('MAC_Vars', '/home/leri/Escritorio/tfg/AccesoMedio/gr-OFDM/python/OFDM_Variables.py')
 MAC_Class = OFDM_Variables.MAC_Vars
 
@@ -58,11 +57,12 @@ class MAC_OFDM(gr.basic_block):
         # Tamaño del paquete MAC
         self.MAC_FRAME_SIZE = MAC_Class.MAC_CONTROL_SIZE + self.d_INFO_SIZE
 
+    # Actualiza la variable d_INFO_SIZE y MAC_FRAME_SIZE, en función de los cambios en GNU
     def set_Info_Size(self, Payload_Size):
         self.d_INFO_SIZE = Payload_Size * 8
         self.MAC_FRAME_SIZE = MAC_Class.MAC_CONTROL_SIZE + self.d_INFO_SIZE
 
-
+    # Convierte de decimal a binario, con la longitud indicada
     def decimal_to_binary (self, number, length):
         binary = "{0:0b}".format(number)  # string de 8 bits con el número codificado
         binary = binary.zfill(length)
@@ -70,6 +70,7 @@ class MAC_OFDM(gr.basic_block):
         binary = numpy.uint8(binary)       # Pasamos a numpy.uint8
         return binary
 
+    # Convierte las direcciones MAC a binario
     def process_MAC_Directions (self, MAC):
         parsed_mac = []
         if len(MAC) != self.SRC_MAC_SIZE / 8 :
@@ -81,15 +82,12 @@ class MAC_OFDM(gr.basic_block):
         parsed_mac = list(chain(*parsed_mac))
         return parsed_mac
 
-
-
-
     def forecast(self, noutput_items, ninput_items_required):
         #setup size of input_items[i] for work call
         for i in range(len(ninput_items_required)):
             ninput_items_required[i] = noutput_items
 
-
+    # Une cabeceras e información para crear la trama MAC
     def create_frame (self, payload, seq_number):
 
         frame = numpy.concatenate(
@@ -103,21 +101,21 @@ class MAC_OFDM(gr.basic_block):
         ))
         #frame = numpy.uint8(frame)
         return frame
-
+    # Añade CRC32 a cada trama MAC
     def add_crc(self, frame, offset):
         crc = binascii.crc32(frame) & 0xFFFFFFFF
         crc = "{0:0b}".format(crc)  # string de 16 bits con el número codificado
         crc = crc.zfill(32)
         crc = numpy.uint8(list(crc))
-        # Debug option
+        # Debug line
         crc[:] = 2
         frame_crc = numpy.append(frame, crc)
         check = sum(frame_crc)
+        # Añadimos la etiqueta de inicio de trama para el bloque PHY
         self.add_item_tag(0, # Port number
             self.nitems_written(0) + offset, # Offset
             pmt.intern("MAC Start"), # Key
-            pmt.from_double(self.MAC_FRAME_SIZE),
-            #pmt.from_double() # Value
+            pmt.from_double(self.MAC_FRAME_SIZE),   # Value
         )
         return frame_crc
 
@@ -125,8 +123,8 @@ class MAC_OFDM(gr.basic_block):
 
     def general_work(self, input_items, output_items):
         """
-        Recoge grupos de información y forma paquetes.
-        info = X bytes
+        Capa MAC del transmisor OFDM. Recoge grupos de información, y les añade las cabeceras de control (direcciones MAC, nº de secuencia...)
+        Adicionalmente, etiqueta los inicios de paquete para que el blouqe capa física pueda reconocerlos
         """
         input = input_items[0]
         output = output_items[0]
